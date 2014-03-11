@@ -82,3 +82,32 @@ form input[type=text] {
 .spinner img {
     padding: 10px;
 }
+
+a {
+    color: black;
+    font-size: 1.4em;
+    position: relative;
+    display: inline-block;
+    margin-top: 15px;
+    margin-left: 40px;
+    margin-right: 100px;
+}
+
+a:visited {
+    color: black;
+}
+
+p {
+    border: 1px solid gray;
+    height: 50px;
+    text-align: left;
+    margin-bottom: -16px;
+    vertical-align: middle;
+}
+
+p:nth-child(2n){
+    border: 1px solid gray;
+    height: 50px;
+    background-color: #e0e0e0;
+}
+

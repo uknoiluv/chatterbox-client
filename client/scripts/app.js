@@ -38,17 +38,6 @@ var storeFriends = function(friend){
 	friends[friend] = friend;
 };
 
-var makeFriendsBold = function(){
-  $.each($('p'), function(){
-		var friend = $(this).find('a').html();
-		if (friends[friend]) {
-			$(this).children().css({
-				'font-weight': 'bold'
-			});
-		}
-  });
-};
-
 // filter by room
 var filterRoom = function(roomName){
 	var spanArray = $('p');
@@ -149,7 +138,14 @@ $(document).ready(function(){
   $('body').on('click', 'a', function(e){
 		e.preventDefault();
 		storeFriends($(this).html());
-		makeFriendsBold();
+	  $.each($('p'), function(){
+			var friend = $(this).find('a').html();
+			if (friends[friend]) {
+				$(this).children().css({
+					'font-weight': 'bold'
+				});
+			}
+	  });
   });
 
 
