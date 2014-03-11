@@ -1,68 +1,66 @@
 // YOUR CODE HERE:
-/* global $ */
+/* global $, _ */
 
 var message = {
-  'username': 'TROLL',
-  'text': 'hello',
-  'roomname': 'Troll Room'
+  'username': 'Chef',
+  'text': 'hello Children',
+  'roomname': 'lurker'
 };
 
-var messageTemplate = function(result){
-	var userName = result.username.charAt(0).toUpperCase() + result.username.slice(1);
-	var resultText = result.text.charAt(0).toUpperCase() + result.text.slice(1);
-	var resultRoom = result.roomname.charAt(0).toUpperCase() + result.roomname.slice(1);
-	var message = $('<span>' + userName +': ' + resultText + ' - ' + resultRoom +  '</span><br/><br/>');
+// message template
+var messageTemplate = function(user, text, room){
+	var message = $('<span>' + user +': ' + text + ' - ' + room +  '</span><br/><br/>');
 	return message;
 };
 
-var cleanData = function(user, text, room){
-	var verdict = true;
-	var symbols = ['<','>','-','!','{', '%', '"']
-	if (user === undefined || symbols.indexOf(user.slice(0,1)) !== -1){
-    verdict = false;
-	}
-	if (text === undefined || symbols.indexOf(text.slice(0,1)) !== -1 ){
-    verdict = false;
-	}
-  if (room === undefined){
-  	verdict = true;
-	} else {
-		verdict =  symbols.indexOf(room.slice(0,1)) !== -1 ? false : true;
-	}
-	return verdict;
+// sanitize input string
+var sanitize = function(string){
+	return string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 };
 
-var retrieve = function(room){
+//create list of rooms to select from
+var listRooms = function(rooms){
+	for (var key in rooms){
+		$('#rooms').append('<option value="'+key+'">'+key+'</option>');
+	}
+};
+
+// function to call on successful retreival of data
+var retrieveOnSuccess = function(resultData){
+	var rooms = {};
+	_.each(resultData, function(item) {
+		var room = $('<span class="userSpan">'+item.roomname+'</span>').text();
+		room = sanitize(room);
+		rooms[room] = room;
+		var text = $('<span class="textSpan">'+item.text+'</span>').text();
+		var user = $('<span class="textSpan">'+item.username+'</span>').text();
+		console.log(room, text, user);
+		var message = messageTemplate(user, text, room);
+		$('#main').append(message);
+	});
+	listRooms(rooms);
+};
+
+
+// retrieve messages
+var retrieve = function(specificRoom){
 	$.ajax({
 		url: 'https://api.parse.com/1/classes/chatterbox',
 		type: 'GET',
 		data: {'order':'-createdAt'},
 		contentType: 'application/json',
-		success: function (data) {
-			var rooms = {};
-			for (var i = 0; i < data.results.length; i++){
-				var result = data.results[i];
-				rooms[result.roomname] = result.roomname;
-				if(cleanData(result.username, result.text, result.roomname) === true){
-					var message = messageTemplate(result);
-					$('#main').append(message);
-				}
-			}
-			for (var key in rooms){
-				var room = $('<option value="'+key+'">'+key+'</option>');
-				$('#rooms').append(room);
-			}
+		success: function(data){
+			retrieveOnSuccess(data.results);
 		},
 		error: function (data) {
-			// see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
 			console.error('chatterbox: Failed to send message');
 		}
 	});
 };
 
+// send messages
 var send = function(message) {
 	$.ajax({
-		// always use this url
 		url: 'https://api.parse.com/1/classes/chatterbox',
 		type: 'POST',
 		data: JSON.stringify(message),
@@ -71,14 +69,30 @@ var send = function(message) {
 			console.log('chatterbox: Message sent');
 		},
 		error: function (data) {
-		// see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
 			console.error('chatterbox: Failed to send message');
 		}
 	});
 };
 
+// document ready functions/events
+$(document).ready(function(){
+	$('#refresh').on('click',function(){
+		console.log('hello');
+		retrieve();
+	});
+
+	$('#rooms').on('change', function(item){
+		var room = $(this).val();
+		// console.log(room);
+		$('span, br').remove();
+
+	});
+});
+
+
+
+
 
 
 send(message);
-
 retrieve();
